@@ -1,0 +1,85 @@
+# Taller 7 - Solicitudes avanzadas (API Hotel)
+# Ejecutar en orden, de arriba hacia abajo.
+
+@baseUrl = http://localhost:8080
+
+### crear un cliente de prueba
+# @name crearCliente
+POST {{baseUrl}}/api/clientes
+Content-Type: application/json
+
+{
+  "nombre": "Juan Jose Montezuma",
+  "email": "cliente.{{$guid}}@hotel.com"
+}
+
+### crear una habitación estándar 
+# @name crearEstandar
+POST {{baseUrl}}/api/habitaciones/estandar
+Content-Type: application/json
+
+{
+  "numero": "E{{$randomInt 100 999}}",
+  "precioPorNoche": 80.0,
+  "capacidadMaxima": 2,
+  "camasIndividuales": 2
+}
+
+### PRUEBA 1: Creación de Suite Presidencial
+# @name crearSuite
+POST {{baseUrl}}/api/habitaciones/suites
+Content-Type: application/json
+
+{
+  "numero": "P05-501",
+  "precioPorNoche": 350.0,
+  "capacidadMaxima": 2,
+  "jacuzziPrivado": true,
+  "incluyeMayordomo": true
+}
+
+### reserva en la habitación estándar
+POST {{baseUrl}}/api/reservas
+Content-Type: application/json
+
+{
+  "clienteId": "{{crearCliente.response.body.id}}",
+  "habitacionId": "{{crearEstandar.response.body.id}}",
+  "fechaInicio": "2026-11-10T14:00:00",
+  "fechaFin": "2026-11-13T12:00:00"
+}
+
+### reserva en la suite
+POST {{baseUrl}}/api/reservas
+Content-Type: application/json
+
+{
+  "clienteId": "{{crearCliente.response.body.id}}",
+  "habitacionId": "{{crearSuite.response.body.id}}",
+  "fechaInicio": "2026-12-20T14:00:00",
+  "fechaFin": "2026-12-23T12:00:00"
+}
+
+### PRUEBA 2: Consulta polimórfica
+GET {{baseUrl}}/api/habitaciones
+Accept: application/json
+
+### PRUEBA 3: Resumen ejecutivo del cliente
+GET {{baseUrl}}/api/clientes/{{crearCliente.response.body.id}}/resumen
+Accept: application/json
+
+### PRUEBA 4 (antes): estado inicial del cliente
+GET {{baseUrl}}/api/clientes/{{crearCliente.response.body.id}}
+Accept: application/json
+
+### PRUEBA 4: Actualización selectiva (PATCH) - solo el nombre
+PATCH {{baseUrl}}/api/clientes/{{crearCliente.response.body.id}}
+Content-Type: application/json
+
+{
+  "nombre": "Nuevo Nombre Modificado"
+}
+
+### PRUEBA 4 (después): confirmar en base de datos que nada más cambió ----------
+GET {{baseUrl}}/api/clientes/{{crearCliente.response.body.id}}
+Accept: application/json

@@ -1,0 +1,360 @@
+{
+  "info": {
+    "name": "Taller 7 - Hotel API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Prep A - Crear cliente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Juan Jose Montezuma\",\n  \"email\": \"cliente.{{$guid}}@hotel.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201',()=>pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('clienteId', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prep B - Crear habitacion estandar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/habitaciones/estandar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "habitaciones",
+            "estandar"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"E{{$randomInt}}\",\n  \"precioPorNoche\": 80.0,\n  \"capacidadMaxima\": 2,\n  \"camasIndividuales\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('estandarId', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PRUEBA 1 - Crear Suite Presidencial",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/habitaciones/suites",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "habitaciones",
+            "suites"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"P05-501\",\n  \"precioPorNoche\": 350.0,\n  \"capacidadMaxima\": 2,\n  \"jacuzziPrivado\": true,\n  \"incluyeMayordomo\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created',()=>pm.response.to.have.status(201));",
+              "pm.test('tipo SUITE',()=>pm.expect(pm.response.json().tipo).to.eql('SUITE'));",
+              "pm.collectionVariables.set('suiteId', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prep C - Reserva estandar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/reservas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "reservas"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"habitacionId\": \"{{estandarId}}\",\n  \"fechaInicio\": \"2026-11-10T14:00:00\",\n  \"fechaFin\": \"2026-11-13T12:00:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Prep D - Reserva suite",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/reservas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "reservas"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"habitacionId\": \"{{suiteId}}\",\n  \"fechaInicio\": \"2026-12-20T14:00:00\",\n  \"fechaFin\": \"2026-12-23T12:00:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PRUEBA 2 - Consulta polimorfica",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/habitaciones",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "habitaciones"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200',()=>pm.response.to.have.status(200));",
+              "const tipos = pm.response.json().map(h=>h.tipo);",
+              "pm.test('conviven ESTANDAR y SUITE',()=>{pm.expect(tipos).to.include('ESTANDAR');pm.expect(tipos).to.include('SUITE');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PRUEBA 3 - Resumen del cliente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}/resumen",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}",
+            "resumen"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200',()=>pm.response.to.have.status(200));",
+              "pm.test('2 reservas',()=>pm.expect(pm.response.json().totalReservasRealizadas).to.eql(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PRUEBA 4 - Estado antes del PATCH",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "PRUEBA 4 - PATCH solo nombre",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Nuevo Nombre Modificado\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200',()=>pm.response.to.have.status(200));",
+              "pm.test('nombre cambiado',()=>pm.expect(pm.response.json().nombre).to.eql('Nuevo Nombre Modificado'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PRUEBA 4 - Estado despues del PATCH",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "clienteId",
+      "value": ""
+    },
+    {
+      "key": "estandarId",
+      "value": ""
+    },
+    {
+      "key": "suiteId",
+      "value": ""
+    }
+  ]
+}
